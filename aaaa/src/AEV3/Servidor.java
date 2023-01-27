@@ -25,7 +25,7 @@ public class Servidor {
 		ctxTodo.setHandler(gestorHTTP);
 		
 		ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor)Executors.newFixedThreadPool(10);
-		servidor.setExecutor(threadPoolExecutor);
+		servidor.setExecutor(null);//threadPoolExecutor);
 		servidor.start();
 		System.out.println("Servidor HTTP arranca en el puerto " + puerto);
 		
