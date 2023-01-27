@@ -18,11 +18,6 @@ import com.sun.net.httpserver.HttpHandler;
 
 public class GestorHTTP implements HttpHandler {
 
-	 String alias;
-	 String nombre;
-	 int any;
-	 String nacionalidad;
-	 String imagen;
 	MongoCollection<Document> coleccion=null;
 	
 	@Override
@@ -33,8 +28,7 @@ public class GestorHTTP implements HttpHandler {
 			caso = asignarCaso(httpExchange);
 			conexio();
 			requestParamValue = handleGetRequest(httpExchange);
-			buscarCriminal(requestParamValue);
-			handleGETResponse(httpExchange);
+			handleGETResponse(httpExchange,requestParamValue);
 		} else if ("POST".equals(httpExchange.getRequestMethod())) {
 			// requestParamValue = handlePostRequest(httpExchange);
 			// handlePOSTResponse(httpExchange, requestParamValue);
@@ -54,10 +48,25 @@ public class GestorHTTP implements HttpHandler {
 		return caso;
 	}
 
-	private void handleGETResponse(HttpExchange httpExchange) throws IOException {
+	private void handleGETResponse(HttpExchange httpExchange,String requestParamValue) throws IOException {
+		Bson query = Filters.eq("alias", requestParamValue);
+		MongoCursor<Document> cursor = coleccion.find(query).iterator();
+		String alias="Error";
+		String nombre="Error";
+		String nacionalidad="Error";
+		int any=0;
+        while (cursor.hasNext()) {
+            JSONObject obj = new JSONObject(cursor.next().toJson());
+            alias=obj.getString("alias");
+            System.out.println("Alias: :"+alias);
+            nombre=obj.getString("nombreCompleto");
+            any=obj.getInt("fechaNacimiento");
+            nacionalidad=obj.getString("nacionalidad");
+        }
+        
 //		System.out.println("Recibida URI tipo GET: " + httpExchange.getRequestURI().toString());
 //		OutputStream outputStream = httpExchange.getResponseBody();
-//		String htmlResponse = "<html><body>Hola a a" + requestParamValue + "</body></html>";
+//		String htmlResponse = "<html><body><h3>Alias: " + alias + "</h3><h3>Nombre: " + nombre + "</h3></body></html>";
 //		httpExchange.sendResponseHeaders(200, htmlResponse.length());
 //		outputStream.write(htmlResponse.getBytes());
 //		outputStream.flush();
@@ -82,7 +91,7 @@ public class GestorHTTP implements HttpHandler {
 				.append("</body>")
 				.append("</html>");
 		// encode HTML content
-		String htmlResponse = StringEscapeUtils.escapeHtml4(htmlBuilder.toString());
+		String htmlResponse = StringEscapeUtils.escapeJson(htmlBuilder.toString());
 		// this line is a must
 		httpExchange.sendResponseHeaders(200, htmlResponse.length());
 		outputStream.write(htmlResponse.getBytes());
@@ -102,19 +111,7 @@ public class GestorHTTP implements HttpHandler {
 	}
 	
 	public void buscarCriminal(String a) {
-		Bson query = Filters.eq("alias", a);
-		MongoCursor<Document> cursor = coleccion.find(query).iterator();
-        while (cursor.hasNext()) {
-            JSONObject obj = new JSONObject(cursor.next().toJson());
-            alias=obj.getString("alias");
-            System.out.println("Alias: :"+alias);
-            nombre=obj.getString("nombreCompleto");
-            System.out.println("Alias: :"+nombre);
-       	 	any=obj.getInt("fechaNaciemiento");
-       	 System.out.println("Alias: :"+any);
-       	 	nacionalidad=obj.getString("nacionalidad");
-       	 System.out.println("Alias: :"+nacionalidad);
-        }
+		
         //System.out.println("Buscar a :"+a);
 	}
 }
