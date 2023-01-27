@@ -54,6 +54,7 @@ public class GestorHTTP implements HttpHandler {
 		String alias="Error";
 		String nombre="Error";
 		String nacionalidad="Error";
+		String imag="Error";
 		int any=0;
         while (cursor.hasNext()) {
             JSONObject obj = new JSONObject(cursor.next().toJson());
@@ -62,6 +63,7 @@ public class GestorHTTP implements HttpHandler {
             nombre=obj.getString("nombreCompleto");
             any=obj.getInt("fechaNacimiento");
             nacionalidad=obj.getString("nacionalidad");
+            imag=obj.getString("imagen");
         }
         
 //		System.out.println("Recibida URI tipo GET: " + httpExchange.getRequestURI().toString());
@@ -88,15 +90,16 @@ public class GestorHTTP implements HttpHandler {
 				.append("</h3>")
 				.append("<h3> Nacionalidad: "+nacionalidad)
 				.append("</h3>")
-				.append("</body>")
-				.append("</html>");
+				.append("<img src=\"data:image/png;base64, "+imag+"\"> ");
+				
 		// encode HTML content
-		String htmlResponse = StringEscapeUtils.escapeJson(htmlBuilder.toString());
+		String htmlResponse = htmlBuilder.toString();
 		// this line is a must
 		httpExchange.sendResponseHeaders(200, htmlResponse.length());
 		outputStream.write(htmlResponse.getBytes());
 		outputStream.flush();
 		outputStream.close();
+		System.out.println(imag);
 	}
 	
 	public void conexio() {
@@ -114,4 +117,5 @@ public class GestorHTTP implements HttpHandler {
 		
         //System.out.println("Buscar a :"+a);
 	}
+	
 }
