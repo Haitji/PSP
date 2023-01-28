@@ -1,6 +1,9 @@
 package AEV3;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 
 import org.apache.commons.text.StringEscapeUtils;
@@ -9,6 +12,7 @@ import org.bson.conversions.Bson;
 import org.json.JSONObject;
 
 import com.mongodb.MongoClient;
+import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
@@ -20,6 +24,8 @@ public class GestorHTTP implements HttpHandler {
 
 	MongoCollection<Document> coleccion=null;
 	
+	
+
 	@Override
 	public void handle(HttpExchange httpExchange) throws IOException {
 		String requestParamValue = null;
@@ -27,6 +33,12 @@ public class GestorHTTP implements HttpHandler {
 		if ("GET".equals(httpExchange.getRequestMethod())) {
 			caso = asignarCaso(httpExchange);
 			conexio();
+			try {
+				Thread.sleep(2000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			requestParamValue = handleGetRequest(httpExchange);
 			handleGETResponse(httpExchange,requestParamValue);
 		} else if ("POST".equals(httpExchange.getRequestMethod())) {
@@ -90,7 +102,7 @@ public class GestorHTTP implements HttpHandler {
 				.append("</h3>")
 				.append("<h3> Nacionalidad: "+nacionalidad)
 				.append("</h3>")
-				.append("<img src=\"data:image/png;base64, "+imag+"\"> ");
+				.append("<img src=\"data:image/png;base64, " + imag + "\" width=\"500\" height=\"600\"> ");
 				
 		// encode HTML content
 		String htmlResponse = htmlBuilder.toString();
@@ -103,7 +115,10 @@ public class GestorHTTP implements HttpHandler {
 	}
 	
 	public void conexio() {
-		MongoClient mongoClient = new MongoClient("localhost", 27017);
+		String ip="haitian:haitian@3.226.136.98";
+		int port=27017;
+		MongoClientURI uri= new MongoClientURI("mongodb://"+ip+":"+port);
+		MongoClient mongoClient =new MongoClient(uri);
 		MongoDatabase database = mongoClient.getDatabase("CNI");
 		coleccion = database.getCollection("Criminales");
 		if(coleccion!=null) {
@@ -111,11 +126,63 @@ public class GestorHTTP implements HttpHandler {
 		}else {
 			System.out.println("Fallo al conectar");
 		}
+		
+
 	}
 	
-	public void buscarCriminal(String a) {
-		
-        //System.out.println("Buscar a :"+a);
+
+	
+	
+	private String handlePostRequest(HttpExchange httpExchange) {
+		System.out.println("Recibida URI tipo POST: " + httpExchange.getRequestBody().toString());
+		InputStream is = httpExchange.getRequestBody();
+		InputStreamReader isr = new InputStreamReader(is);
+		BufferedReader br = new BufferedReader(isr);
+		StringBuilder sb = new StringBuilder();
+		String line;
+		try {
+			while ((line = br.readLine()) != null) {
+				sb.append(line);
+			}
+			br.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return sb.toString();
+	}
+	
+	private void handlePostResponse(HttpExchange httpExchange, String requestParamValue) throws IOException {
+
+		System.out.println("El servidor pasa a procesar el body de la peticion POST: " + requestParamValue);
+
+		// Opcion 1: si queremos que el servidor devuelva al cliente un HTML:
+		// OutputStream outputStream = httpExchange.getResponseBody();
+		// String htmlResponse = "Parametro/s POST: " + requestParamValue + " -> Se
+		// procesara por parte del servidor";
+		// outputStream.write(htmlResponse.getBytes());
+		// outputStream.flush();
+		// outputStream.close();
+		// System.out.println("Devuelve respuesta HTML: " + htmlResponse);
+		// httpExchange.sendResponseHeaders(200, htmlResponse.length());
+		// System.out.println("Devuelve respuesta HTML: " + htmlResponse);
+
+		// Opcion 2: el servidor devuelve al cliente un codigo de ok pero sin contenido
+		// HTML
+		httpExchange.sendResponseHeaders(204, -1);
+		System.out.println("El servidor devuelve codigo 204");
+
+		// TODO: a partir de aqui todas las operaciones que se quieran programar en el
+		// servidor cuando recibe
+		// una peticion POST (ejemplo: insertar en una base de datos lo que nos envia el
+		// cliente en requestParamValue)
+
+		// NOTA: se puede incluir tambien un punto de control antes de enviar el codigo
+		// resultado de la
+		// operacion en el header (httpExchange.sendResponseHeaders(CODIGOHTTP, {})).
+		// Por ejemplo, si
+		// hay un error se enviarian codigos del tipo 400, 401, 403, 404, etc.
+		// https://developer.mozilla.org/es/docs/Web/HTTP/Status
+
 	}
 	
 }

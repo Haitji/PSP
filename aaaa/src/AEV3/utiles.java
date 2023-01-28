@@ -17,6 +17,7 @@ import org.bson.internal.Base64;
 import org.json.JSONObject;
 
 import com.mongodb.MongoClient;
+import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
@@ -27,7 +28,10 @@ public class utiles {
 	public static void main(String[] args) throws Exception  {
 		MongoCollection<Document> coleccion=null;
 	
-		MongoClient mongoClient = new MongoClient("localhost", 27017);
+		String ip="haitian:haitian@3.226.136.98";
+		int port=27017;
+		MongoClientURI uri= new MongoClientURI("mongodb://"+ip+":"+port);
+		MongoClient mongoClient =new MongoClient(uri);
 		MongoDatabase database = mongoClient.getDatabase("CNI");
 		coleccion = database.getCollection("Criminales");
 		if(coleccion!=null) {
