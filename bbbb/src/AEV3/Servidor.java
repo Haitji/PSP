@@ -13,15 +13,13 @@ import com.sun.net.httpserver.HttpServer;
 public class Servidor {
 	public static void main(String[] args) throws IOException {
 		String host = "localhost"; //127.0.0.1
-		int puerto = 5000;
+		int puerto = 5001;
 		InetSocketAddress direccionTCPIP = new InetSocketAddress(host,puerto);
 		int backlog = 0;
 		HttpServer servidor = HttpServer.create(direccionTCPIP, backlog);
 		GestorHTTP gestorHTTP = new GestorHTTP();
 		String mostrarTodos = "/servidor";
-		//String mostrarUno="/servidor/mostrarUno";
 		HttpContext ctxTodo=servidor.createContext(mostrarTodos);
-		//HttpContext ctxUno=servidor.createContext(mostrarUno);
 		ctxTodo.setHandler(gestorHTTP);
 		
 		ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor)Executors.newFixedThreadPool(10);
